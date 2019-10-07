@@ -3,20 +3,19 @@
     <span class="icon pre" @click="preMonth">
       <i class="el-icon-arrow-left"></i>
     </span>
+    <div class="tabs">
+      <div
+        :class="`tab ${item.name === value ? 'is-active' : ''}`"
+        v-for="(item, index) in tabsArr"
+        :key="index"
+        @click="change(item.name, index)"
+      >
+        {{ item.label }}
+      </div>
+    </div>
     <span class="icon next" @click="nextMonth">
       <i class="el-icon-arrow-right"></i>
     </span>
-    <el-tabs v-model="activeDate" type="border-card" @tab-click="handleClick">
-      <el-tab-pane
-        v-for="(item, index) in tabsArr"
-        :key="index"
-        :label="item.label"
-        :name="item.name"
-      />
-    </el-tabs>
-    <main class="main">
-      <slot name="dateComp" :datestr="activeDate"></slot>
-    </main>
   </div>
 </template>
 <script>
@@ -25,7 +24,6 @@ import dayjs from "dayjs";
 export default {
   data: function() {
     return {
-      activeDate: "2019-09",
       dateObj: dayjs(),
       tabCount: [0, 1, 2, 3, 4, 5, 6],
       index: 0
@@ -36,6 +34,11 @@ export default {
       type: String,
       default: "YYYY年MM月",
       required: false
+    },
+    value: {
+      type: String,
+      default: dayjs().format("YYYY-MM"),
+      required: true
     }
   },
   computed: {
@@ -55,10 +58,10 @@ export default {
         this.tabCount = this.tabCount.map(num => num - 1);
         this.index = 0;
       }
-      this.activeDate = dayjs(this.activeDate)
+      const preMonth = dayjs(this.value)
         .subtract(1, "month")
         .format("YYYY-MM");
-      this.$emit("change", this.activeDate);
+      this.$emit("input", preMonth);
     },
 
     nextMonth() {
@@ -67,50 +70,51 @@ export default {
         this.index = 6;
         this.tabCount = this.tabCount.map(num => num + 1);
       }
-      this.activeDate = dayjs(this.activeDate)
+      const nextMonth = dayjs(this.value)
         .add(1, "month")
         .format("YYYY-MM");
-      this.$emit("change", this.activeDate);
+      this.$emit("input", nextMonth);
     },
 
-    handleClick(tab) {
-      this.index = Number(tab.index);
-      this.$emit("change", this.activeDate);
+    change(selectMonth, index) {
+      this.index = Number(index);
+      this.$emit("input", selectMonth);
     }
   }
 };
 </script>
 <style lang="stylus" scope>
 .box
-  position relative
+  height 45px
+  display flex
   .icon
-    position absolute
     background gray
     color #ffffff
     width 20px
-    height 40px
-    line-height 40px
+    height 43px
+    line-height 43px
     text-align center
-    z-index 3
-  .pre
-    left 0
-  .next
-    right 0
-
-  .main
-    padding 0 15px 15px
-    background #ffffff
     border 1px solid #DCDFE6
     border-top none
-
-  .el-tabs--border-card
-    border-bottom none
-    box-shadow none
-  .el-tabs__nav
-    width 100%
-    padding 0 10px 0 15px
-  .el-tabs__item
-    width calc(100% / 7)
-    text-align center
-    border-right 1px solid #cccccc !important
+  .tabs
+    flex 1
+    display flex
+    border-top 1px solid #cccccc
+    background #e4e7ed
+    .tab
+      flex 1
+      display flex
+      border-right 1px solid #cccccc
+      justify-content center
+      border-bottom 1px solid #cccccc
+      align-items center
+      cursor pointer
+      &:last-child
+        border none
+      &:hover
+        color #409eff
+    .is-active
+      color #409eff
+      border-bottom none
+      background #ffffff
 </style>
